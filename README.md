@@ -6,8 +6,7 @@ A simple and clean **Todo mobile application** built with **Flutter**, designed 
 
 ## 📱 Screenshots
 
-> _Add your app screenshots here_
-
+![Empty_Home_Screen](Screenshot_1795785414.png) ![Logo_app](Screenshot_1795786866.png) ![Home_Screen](Screenshot_1795786909.png) ![Change_photo](Screenshot_1795786912.png) ![Splash_screen](Screenshot_1795787146.png)
 ---
 
 ## ✨ Features
