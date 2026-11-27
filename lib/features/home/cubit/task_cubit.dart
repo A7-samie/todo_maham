@@ -1,6 +1,10 @@
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:path/path.dart' as path;
+import 'package:path_provider/path_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:todo_maham/features/home/Model/task_model.dart';
 
@@ -12,6 +16,8 @@ class TaskCubit extends Cubit<TaskState> {
   static const String _tasksKey = 'tasks_list';
 
   List<TaskModel> _allTasks = [];
+  File? profileImage;
+  final ImagePicker _picker = ImagePicker();
 
   Future<void> loadTasks() async {
     emit(TaskLoading());
@@ -88,6 +94,56 @@ class TaskCubit extends Cubit<TaskState> {
           .where((t) => t.taskText!.toLowerCase().contains(word.toLowerCase()))
           .toList();
       emit(TaskLoaded(tasks: _allTasks, filteredTasks: filtered));
+    }
+  }
+
+  Future<void> loadSavedImage() async {
+    final prefs = await SharedPreferences.getInstance();
+    final savedPath = prefs.getString('profile_image_path');
+    if (savedPath != null) {
+      final file = File(savedPath);
+      if (await file.exists()) {
+        profileImage = file;
+        // 👇 ضيف emit عشان الـ UI يتحدث
+        final currentState = state;
+        if (currentState is TaskLoaded) {
+          emit(
+            TaskLoaded(
+              tasks: currentState.tasks,
+              filteredTasks: currentState.filteredTasks,
+            ),
+          );
+        }
+      }
+    }
+  }
+
+  Future<void> pickImage() async {
+    final XFile? picked = await _picker.pickImage(
+      source: ImageSource.gallery,
+      imageQuality: 80,
+    );
+
+    if (picked == null) return;
+
+    final appDir = await getApplicationDocumentsDirectory();
+    final fileName = 'profile_${DateTime.now().millisecondsSinceEpoch}.jpg';
+    final savedImage = await File(picked.path)
+        .copy(path.join(appDir.path, fileName));
+
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString('profile_image_path', savedImage.path);
+
+    profileImage = savedImage;
+    // 👇 ضيف emit عشان الـ UI يتحدث
+    final currentState = state;
+    if (currentState is TaskLoaded) {
+      emit(
+        TaskLoaded(
+          tasks: currentState.tasks,
+          filteredTasks: currentState.filteredTasks,
+        ),
+      );
     }
   }
 }

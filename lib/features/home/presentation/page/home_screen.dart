@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:material_ui/material_ui.dart';
@@ -16,11 +18,12 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   final taskController = TextEditingController();
-
+  // ignore: unused_field
   @override
   void initState() {
     super.initState();
     context.read<TaskCubit>().loadTasks();
+    context.read<TaskCubit>().loadSavedImage();
   }
 
   @override
@@ -31,6 +34,8 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final File? profileImage = context.watch<TaskCubit>().profileImage;
+
     return SafeArea(
       child: Scaffold(
         drawer: const Drawer(),
@@ -44,19 +49,16 @@ class _HomeScreenState extends State<HomeScreen> {
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 8.0),
               child: InkWell(
-                onTap: () {},
+                onTap: () => context.read<TaskCubit>().pickImage(),
                 borderRadius: const BorderRadius.all(Radius.circular(50)),
                 child: Container(
                   decoration: const BoxDecoration(shape: BoxShape.circle),
                   height: 35.h,
                   width: 35.w,
                   child: ClipOval(
-                    child: Image.asset(
-                      "assets/images/ahmed.jpeg",
-                      width: MediaQuery.sizeOf(context).width,
-                      height: MediaQuery.sizeOf(context).height,
-                      fit: BoxFit.fill,
-                    ),
+                    child: profileImage != null
+                        ? Image.file(profileImage, fit: BoxFit.cover)
+                        : const Icon(Icons.person),
                   ),
                 ),
               ),
